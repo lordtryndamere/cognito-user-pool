@@ -30,6 +30,17 @@ Resources:
           Properties:
             Path: /users
             Method: post
+  LoginUserHandlerFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: PhotoAppUsersAPICognito
+      Handler: com.appsdeveloperblog.aws.lambda.LoginUserHandler::handleRequest
+      Events:
+        LoginUser:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /login
+            Method: post
 
   ConfirmUserHandlerFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
@@ -50,20 +61,31 @@ Outputs:
   CreateUserApi:
     Description: "API Gateway endpoint URL for Prod stage for CreateUserHandler Function"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Dev/users"
+  LoginUserApi:
+    Description: "API Gateway endpoint URL for Prod stage for LoginUserHandler Function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Dev/login"
   ConfirmUserApi:
     Description: "API Gateway endpoint URL for Prod stage for ConfirmUserHandler Function"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Dev/confirm"
 
+
+
   CreateUserHandlerFunction:
     Description: "CreateUserHandler Lambda Function ARN"
     Value: !GetAtt CreateUserHandlerFunction.Arn
+  LoginUserHandlerFunction:
+    Description: "LoginUserHandler Lambda Function ARN"
+    Value: !GetAtt LoginUserHandlerFunction.Arn
   ConfirmUserHandlerFunction:
     Description: "ConfirmUserHandler Lambda Function ARN"
     Value: !GetAtt ConfirmUserHandlerFunction.Arn
-#42b83ff9-c8ba-4abc-bade-3c275356046d
+
   CreateUserHandlerFunctionIamRole:
     Description: "Implicit IAM Role created for CreateUserHandler"
     Value: !GetAtt CreateUserHandlerFunctionRole.Arn
+  LoginUserHandlerFunctionIamRole:
+    Description: "Implicit IAM Role created for LoginUserHandler"
+    Value: !GetAtt LoginUserHandlerFunctionIamRole.Arn
   ConfirmUserHandlerFunctionIamRole:
     Description: "Implicit IAM Role created for ConfirmUserHandler"
     Value: !GetAtt ConfirmUserHandlerFunctionRole.Arn

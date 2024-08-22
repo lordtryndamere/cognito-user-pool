@@ -82,6 +82,7 @@ public class CognitoUserService {
         String generatedSecretHash = calculateSecretHash(appClientId, appClientSecret, email);
 
 
+
         SignUpRequest signUpRequest = SignUpRequest.builder()
                 .username(email)
                 .password(password)
@@ -97,9 +98,14 @@ public class CognitoUserService {
         createUserResult.addProperty("isConfirmed", signUpResponse.userConfirmed());
         return createUserResult;
     }
+    public void userLogin(JsonObject user, String appClientId, String appClientSecret){
+
+    }
 
     public JsonObject confirmUserSignup(String appClientId, String appClientSecret, String email, String confirmationCode) {
         String generatedSecretHash = calculateSecretHash(appClientId, appClientSecret, email);
+
+
        ConfirmSignUpRequest confirmSignUpRequest =  ConfirmSignUpRequest.builder()
                 .secretHash(generatedSecretHash)
                 .username(email)
