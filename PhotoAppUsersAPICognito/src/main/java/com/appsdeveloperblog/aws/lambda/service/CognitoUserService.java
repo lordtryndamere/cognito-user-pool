@@ -79,10 +79,6 @@ public class CognitoUserService {
                 .value(name)
                 .build();
 
-        // AttributeType attributeUserId = AttributeType.builder()
-        //         .name("custom:userId")
-        //         .value(userId)
-        //         .build();
 
         attributeTypes.add(emailAttribute);
         attributeTypes.add(addressAttribute);
@@ -90,7 +86,6 @@ public class CognitoUserService {
         attributeTypes.add(genderAttribute);
         attributeTypes.add(phoneNumberAttribute);
         attributeTypes.add(nameAttribute);
-//        attributeTypes.add(attributeUserId);
 
         String generatedSecretHash = calculateSecretHash(appClientId, appClientSecret, email);
 
