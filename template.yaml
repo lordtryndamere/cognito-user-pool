@@ -85,7 +85,7 @@ Outputs:
     Value: !GetAtt CreateUserHandlerFunctionRole.Arn
   LoginUserHandlerFunctionIamRole:
     Description: "Implicit IAM Role created for LoginUserHandler"
-    Value: !GetAtt LoginUserHandlerFunctionIamRole.Arn
+    Value: !GetAtt LoginUserHandlerFunctionRole.Arn
   ConfirmUserHandlerFunctionIamRole:
     Description: "Implicit IAM Role created for ConfirmUserHandler"
     Value: !GetAtt ConfirmUserHandlerFunctionRole.Arn

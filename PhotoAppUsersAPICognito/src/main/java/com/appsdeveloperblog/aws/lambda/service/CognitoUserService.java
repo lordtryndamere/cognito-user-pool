@@ -117,7 +117,7 @@ public class CognitoUserService {
         authParams.put("SECRET_HASH", generatedSecretHash);
 
         InitiateAuthRequest initiateAuthRequest = InitiateAuthRequest.builder()
-                .authFlow(AuthFlowType.ADMIN_USER_PASSWORD_AUTH)
+                .authFlow(AuthFlowType.USER_PASSWORD_AUTH)
                 .clientId(appClientId)
                 .authParameters(authParams)
                 .build();

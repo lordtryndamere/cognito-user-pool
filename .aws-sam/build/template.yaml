@@ -30,6 +30,19 @@ Resources:
             Method: post
     Metadata:
       SamResourceId: CreateUserHandlerFunction
+  LoginUserHandlerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: LoginUserHandlerFunction
+      Handler: com.appsdeveloperblog.aws.lambda.LoginUserHandler::handleRequest
+      Events:
+        LoginUser:
+          Type: Api
+          Properties:
+            Path: /login
+            Method: post
+    Metadata:
+      SamResourceId: LoginUserHandlerFunction
   ConfirmUserHandlerFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -48,6 +61,10 @@ Outputs:
     Description: API Gateway endpoint URL for Prod stage for CreateUserHandler Function
     Value:
       Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Dev/users
+  LoginUserApi:
+    Description: API Gateway endpoint URL for Prod stage for LoginUserHandler Function
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Dev/login
   ConfirmUserApi:
     Description: API Gateway endpoint URL for Prod stage for ConfirmUserHandler Function
     Value:
@@ -57,6 +74,12 @@ Outputs:
     Value:
       Fn::GetAtt:
       - CreateUserHandlerFunction
+      - Arn
+  LoginUserHandlerFunction:
+    Description: LoginUserHandler Lambda Function ARN
+    Value:
+      Fn::GetAtt:
+      - LoginUserHandlerFunction
       - Arn
   ConfirmUserHandlerFunction:
     Description: ConfirmUserHandler Lambda Function ARN
@@ -69,6 +92,12 @@ Outputs:
     Value:
       Fn::GetAtt:
       - CreateUserHandlerFunctionRole
+      - Arn
+  LoginUserHandlerFunctionIamRole:
+    Description: Implicit IAM Role created for LoginUserHandler
+    Value:
+      Fn::GetAtt:
+      - LoginUserHandlerFunctionRole
       - Arn
   ConfirmUserHandlerFunctionIamRole:
     Description: Implicit IAM Role created for ConfirmUserHandler

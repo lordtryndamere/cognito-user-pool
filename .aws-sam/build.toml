@@ -7,6 +7,6 @@ architecture = "x86_64"
 handler = "com.appsdeveloperblog.aws.lambda.CreateUserHandler::handleRequest"
 manifest_hash = ""
 packagetype = "Zip"
-functions = ["CreateUserHandlerFunction", "ConfirmUserHandlerFunction"]
+functions = ["CreateUserHandlerFunction", "LoginUserHandlerFunction", "ConfirmUserHandlerFunction"]
 
 [layer_build_definitions]
