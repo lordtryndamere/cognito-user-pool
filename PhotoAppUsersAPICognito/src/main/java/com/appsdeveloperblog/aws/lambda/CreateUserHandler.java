@@ -33,6 +33,7 @@ public class CreateUserHandler implements RequestHandler<APIGatewayProxyRequestE
         this.appClientSecret = Utils.decryptKey(Constants.MY_COGNITO_POOL_APP_CLIENT_SECRET);
     }
 
+    @Override
     public APIGatewayProxyResponseEvent handleRequest(final APIGatewayProxyRequestEvent input, final Context context) {
         Map<String, String> headers = new HashMap<>();
         LambdaLogger logger = context.getLogger();
