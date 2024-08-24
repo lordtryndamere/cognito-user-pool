@@ -58,6 +58,14 @@ Resources:
     Properties:
       CodeUri: PhotoAppUsersAPICognito
       Handler: com.appsdeveloperblog.aws.lambda.ResetPasswordHandler::handleRequest
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - cognito-idp:ForgotPassword
+                - cognito-idp:ConfirmForgotPassword
+              Resource: arn:aws:cognito-idp:us-east-2:905418036196:userpool/us-east-2_4wr69uDOE
       Events:
         ResetPassword:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
