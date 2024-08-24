@@ -1,21 +1,35 @@
 package com.appsdeveloperblog.aws.lambda.service;
 
-import com.google.gson.JsonObject;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
-import software.amazon.awssdk.services.cognitoidentityprovider.model.*;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.UUID;
+
+import com.google.gson.JsonObject;
+
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.AttributeType;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.AuthFlowType;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.AuthenticationResultType;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.ConfirmSignUpRequest;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.ConfirmSignUpResponse;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.InitiateAuthRequest;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.InitiateAuthResponse;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.SignUpRequest;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.SignUpResponse;
 
 public class CognitoUserService {
-    private final CognitoIdentityProviderClient cognitoIdentityProviderClient;
 
+    private final CognitoIdentityProviderClient cognitoIdentityProviderClient;
 
     public CognitoUserService(String region) {
         this.cognitoIdentityProviderClient = CognitoIdentityProviderClient.builder()
@@ -65,10 +79,10 @@ public class CognitoUserService {
                 .value(name)
                 .build();
 
-        AttributeType attributeUserId = AttributeType.builder()
-                .name("custom:userId")
-                .value(userId)
-                .build();
+        // AttributeType attributeUserId = AttributeType.builder()
+        //         .name("custom:userId")
+        //         .value(userId)
+        //         .build();
 
         attributeTypes.add(emailAttribute);
         attributeTypes.add(addressAttribute);
@@ -78,10 +92,7 @@ public class CognitoUserService {
         attributeTypes.add(nameAttribute);
 //        attributeTypes.add(attributeUserId);
 
-
         String generatedSecretHash = calculateSecretHash(appClientId, appClientSecret, email);
-
-
 
         SignUpRequest signUpRequest = SignUpRequest.builder()
                 .username(email)
@@ -98,26 +109,52 @@ public class CognitoUserService {
         createUserResult.addProperty("isConfirmed", signUpResponse.userConfirmed());
         return createUserResult;
     }
-    public void userLogin(JsonObject user, String appClientId, String appClientSecret){
+
+    public JsonObject userLogin(JsonObject user, String appClientId, String appClientSecret) {
+        JsonObject resultTransaction = new JsonObject();
+        String email = user.get("email").getAsString();
+        String password = user.get("password").getAsString();
+        String generatedSecretHash = calculateSecretHash(appClientId, appClientSecret, email);
+
+        Map<String, String> authParams = new HashMap<>();
+        authParams.put("USERNAME", email);
+        authParams.put("PASSWORD", password);
+        authParams.put("SECRET_HASH", generatedSecretHash);
+
+        InitiateAuthRequest initiateAuthRequest = InitiateAuthRequest.builder()
+                .authFlow(AuthFlowType.ADMIN_USER_PASSWORD_AUTH)
+                .clientId(appClientId)
+                .authParameters(authParams)
+                .build();
+        InitiateAuthResponse initiateAuthResponse = cognitoIdentityProviderClient.initiateAuth(initiateAuthRequest);
+        AuthenticationResultType authResult = initiateAuthResponse.authenticationResult();
+
+        resultTransaction.addProperty("isSuccesful", initiateAuthResponse.sdkHttpResponse().isSuccessful());
+        resultTransaction.addProperty("statusCode", initiateAuthResponse.sdkHttpResponse().statusCode());
+        if (authResult != null) {
+            resultTransaction.addProperty("idToken", authResult.idToken());
+            resultTransaction.addProperty("accessToken", authResult.accessToken());
+            resultTransaction.addProperty("refreshToken", authResult.refreshToken());
+        }
+        return resultTransaction;
 
     }
 
     public JsonObject confirmUserSignup(String appClientId, String appClientSecret, String email, String confirmationCode) {
         String generatedSecretHash = calculateSecretHash(appClientId, appClientSecret, email);
 
-
-       ConfirmSignUpRequest confirmSignUpRequest =  ConfirmSignUpRequest.builder()
+        ConfirmSignUpRequest confirmSignUpRequest = ConfirmSignUpRequest.builder()
                 .secretHash(generatedSecretHash)
                 .username(email)
                 .confirmationCode(confirmationCode)
                 .clientId(appClientId)
                 .build();
 
-       ConfirmSignUpResponse confirmSignUpResponse =  cognitoIdentityProviderClient.confirmSignUp(confirmSignUpRequest);
-       JsonObject confirmUserResponse = new JsonObject();
-       confirmUserResponse.addProperty("isSuccessful", confirmSignUpResponse.sdkHttpResponse().isSuccessful());
-       confirmUserResponse.addProperty("statusCode", confirmSignUpResponse.sdkHttpResponse().statusCode());
-       return confirmUserResponse;
+        ConfirmSignUpResponse confirmSignUpResponse = cognitoIdentityProviderClient.confirmSignUp(confirmSignUpRequest);
+        JsonObject confirmUserResponse = new JsonObject();
+        confirmUserResponse.addProperty("isSuccessful", confirmSignUpResponse.sdkHttpResponse().isSuccessful());
+        confirmUserResponse.addProperty("statusCode", confirmSignUpResponse.sdkHttpResponse().statusCode());
+        return confirmUserResponse;
 
     }
 
@@ -133,10 +170,9 @@ public class CognitoUserService {
             mac.update(userName.getBytes(StandardCharsets.UTF_8));
             byte[] rawHmac = mac.doFinal(userPoolClientId.getBytes(StandardCharsets.UTF_8));
             return Base64.getEncoder().encodeToString(rawHmac);
-        } catch (Exception e) {
+        } catch (IllegalStateException | InvalidKeyException | NoSuchAlgorithmException e) {
             throw new RuntimeException("Error while calculating ");
         }
     }
 
 }
-

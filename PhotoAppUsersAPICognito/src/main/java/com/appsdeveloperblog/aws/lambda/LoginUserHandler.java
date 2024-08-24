@@ -1,5 +1,8 @@
 package com.appsdeveloperblog.aws.lambda;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
@@ -8,9 +11,12 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 import com.appsdeveloperblog.aws.lambda.constants.Constants;
 import com.appsdeveloperblog.aws.lambda.service.CognitoUserService;
 import com.appsdeveloperblog.aws.lambda.utils.Utils;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 
-import java.util.HashMap;
-import java.util.Map;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
 
 public class LoginUserHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
@@ -36,6 +42,26 @@ public class LoginUserHandler implements RequestHandler<APIGatewayProxyRequestEv
         headers.put("Content-Type", "application/json");
 
         //Code Here
+
+        try {
+            String requestBody = input.getBody();
+            logger.log("Original json body:" + requestBody);
+            JsonObject userDetails = JsonParser.parseString(requestBody).getAsJsonObject();
+                   try {
+                JsonObject loginUserResult = cognitoUserService.userLogin(userDetails, appClientId, appClientSecret.trim());
+                response.withStatusCode(200);
+                response.withBody(new Gson().toJson(loginUserResult, JsonObject.class));
+            } catch (AwsServiceException ex) {
+                logger.log(ex.awsErrorDetails().errorMessage());
+                response.withStatusCode(500);
+                response.withBody(ex.awsErrorDetails().errorMessage());
+            }
+
+            
+        } catch (JsonSyntaxException e) {
+            response.setStatusCode(500);
+            response.setBody("Internal Server Error : " + e.getMessage());
+        }
 
 
         return  response;

@@ -1,5 +1,8 @@
 package com.appsdeveloperblog.aws.lambda;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
@@ -11,10 +14,9 @@ import com.appsdeveloperblog.aws.lambda.utils.Utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import com.google.gson.JsonSyntaxException;
 
-import java.util.HashMap;
-import java.util.Map;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
 
 /**
  * Handler for requests to Lambda function.
@@ -53,7 +55,7 @@ public class CreateUserHandler implements RequestHandler<APIGatewayProxyRequestE
                 response.withBody(ex.awsErrorDetails().errorMessage());
             }
 
-        } catch (Exception e) {
+        } catch (JsonSyntaxException e) {
             response.setStatusCode(500);
             response.setBody("Internal Server Error : " + e.getMessage());
         }
