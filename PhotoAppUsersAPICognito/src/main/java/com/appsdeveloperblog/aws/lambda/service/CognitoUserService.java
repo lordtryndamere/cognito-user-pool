@@ -17,15 +17,7 @@ import com.google.gson.JsonObject;
 
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
-import software.amazon.awssdk.services.cognitoidentityprovider.model.AttributeType;
-import software.amazon.awssdk.services.cognitoidentityprovider.model.AuthFlowType;
-import software.amazon.awssdk.services.cognitoidentityprovider.model.AuthenticationResultType;
-import software.amazon.awssdk.services.cognitoidentityprovider.model.ConfirmSignUpRequest;
-import software.amazon.awssdk.services.cognitoidentityprovider.model.ConfirmSignUpResponse;
-import software.amazon.awssdk.services.cognitoidentityprovider.model.InitiateAuthRequest;
-import software.amazon.awssdk.services.cognitoidentityprovider.model.InitiateAuthResponse;
-import software.amazon.awssdk.services.cognitoidentityprovider.model.SignUpRequest;
-import software.amazon.awssdk.services.cognitoidentityprovider.model.SignUpResponse;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.*;
 
 public class CognitoUserService {
 
@@ -41,6 +33,54 @@ public class CognitoUserService {
         this.cognitoIdentityProviderClient = cognitoIdentityProviderClient;
     }
 
+    public JsonObject initiatePasswordReset(String username, String appClientId, String appClientSecret) {
+        JsonObject initiatePasswordResetResult = new JsonObject();
+        try {
+
+            String generatedSecretHash = calculateSecretHash(appClientId, appClientSecret, username);
+            ForgotPasswordRequest forgotPasswordRequest = ForgotPasswordRequest.builder()
+                    .clientId(appClientId)
+                    .secretHash(generatedSecretHash)
+                    .username(username)
+                    .build();
+
+            ForgotPasswordResponse forgotPasswordResponse = cognitoIdentityProviderClient.forgotPassword(forgotPasswordRequest);
+
+            initiatePasswordResetResult.addProperty("isSuccessful", forgotPasswordResponse.sdkHttpResponse().isSuccessful());
+            initiatePasswordResetResult.addProperty("statusCode", forgotPasswordResponse.sdkHttpResponse().statusCode());
+            return initiatePasswordResetResult;
+        } catch (CognitoIdentityProviderException e) {
+            initiatePasswordResetResult.addProperty("isSuccessful", false);
+            initiatePasswordResetResult.addProperty("statusCode", 500);
+            initiatePasswordResetResult.addProperty("errorMessage", e.getMessage());
+            return initiatePasswordResetResult;
+        }
+    }
+    public JsonObject confirmPasswordReset(String username, String newPassword, String confirmationCode, String appClientId, String appClientSecret) {
+        JsonObject confirmPasswordResetResult = new JsonObject();
+        try {
+
+            String generatedSecretHash = calculateSecretHash(appClientId, appClientSecret, username);
+            ConfirmForgotPasswordRequest confirmForgotPasswordRequest = ConfirmForgotPasswordRequest.builder()
+                    .clientId(appClientId)
+                    .secretHash(generatedSecretHash)
+                    .username(username)
+                    .password(newPassword)
+                    .confirmationCode(confirmationCode)
+                    .build();
+
+            ConfirmForgotPasswordResponse confirmForgotPasswordResponse =
+                    cognitoIdentityProviderClient.confirmForgotPassword(confirmForgotPasswordRequest);
+            confirmPasswordResetResult.addProperty("isSuccessful", confirmForgotPasswordResponse.sdkHttpResponse().isSuccessful());
+            confirmPasswordResetResult.addProperty("statusCode", confirmForgotPasswordResponse.sdkHttpResponse().statusCode());
+            return confirmPasswordResetResult;
+        } catch (CognitoIdentityProviderException e) {
+            confirmPasswordResetResult.addProperty("isSuccessful", false);
+            confirmPasswordResetResult.addProperty("statusCode", 500);
+            confirmPasswordResetResult.addProperty("errorMessage", e.getMessage());
+            return confirmPasswordResetResult;
+        }
+    }
     public JsonObject createUser(JsonObject user, String appClientId, String appClientSecret) {
         JsonObject createUserResult = new JsonObject();
         List<AttributeType> attributeTypes = new ArrayList<>();
