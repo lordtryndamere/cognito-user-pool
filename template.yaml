@@ -53,6 +53,17 @@ Resources:
           Properties:
             Path: /confirm
             Method: post
+  ResetPasswordHandlerFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: PhotoAppUsersAPICognito
+      Handler: com.appsdeveloperblog.aws.lambda.ResetPasswordHandler::handleRequest
+      Events:
+        ResetPassword:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /resetPassword
+            Method: post
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
@@ -67,6 +78,9 @@ Outputs:
   ConfirmUserApi:
     Description: "API Gateway endpoint URL for Prod stage for ConfirmUserHandler Function"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Dev/confirm"
+  ResetPasswordApi:
+    Description: "API Gateway endpoint URL for Prod stage for ResetPasswordHandler Function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Dev/resetPassword"
 
 
 
@@ -79,6 +93,9 @@ Outputs:
   ConfirmUserHandlerFunction:
     Description: "ConfirmUserHandler Lambda Function ARN"
     Value: !GetAtt ConfirmUserHandlerFunction.Arn
+  ResetPasswordHandlerFunction:
+    Description: "ResetPasswordHandler Lambda Function ARN"
+    Value: !GetAtt ResetPasswordHandlerFunction.Arn
 
   CreateUserHandlerFunctionIamRole:
     Description: "Implicit IAM Role created for CreateUserHandler"
@@ -89,3 +106,6 @@ Outputs:
   ConfirmUserHandlerFunctionIamRole:
     Description: "Implicit IAM Role created for ConfirmUserHandler"
     Value: !GetAtt ConfirmUserHandlerFunctionRole.Arn
+  ResetPasswordHandlerFunctionIamRole:
+    Description: "Implicit IAM Role created for ResetPasswordHandler"
+    Value: !GetAtt ResetPasswordHandlerFunctionRole.Arn
