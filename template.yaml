@@ -12,7 +12,7 @@ Globals:
     Runtime: java11
     Architectures:
       - x86_64
-    MemorySize: 512
+    MemorySize: 1024
     Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
         Variables:
           MY_COGNITO_POOL_APP_CLIENT_ID: AQICAHgFAAYb7H9c5LEEvvtO8HxwQtfYNHuk2d7a4BKX93QHiQFQmDPvBzKwq5jLeNgQ0C4xAAAAeTB3BgkqhkiG9w0BBwagajBoAgEAMGMGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMB4LcG/Q8i8c8OQK9AgEQgDYN2V0Zdh6PxPkdrC61lXWveazwwuiWp87Odmdj51T81hP6zLkGa+a6ueIMhQ+rYq5zP3W4OnM=
