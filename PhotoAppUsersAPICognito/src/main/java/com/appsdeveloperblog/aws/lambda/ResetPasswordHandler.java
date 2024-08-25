@@ -38,20 +38,24 @@ public class ResetPasswordHandler implements RequestHandler<APIGatewayProxyReque
             JsonObject forgotPasswordFlowDetails = JsonParser.parseString(requestBody).getAsJsonObject();
             String action = forgotPasswordFlowDetails.get("action").getAsString();
             String username = forgotPasswordFlowDetails.get("username").getAsString();
-            if (action.equals("initiatePasswordReset")) {
-               JsonObject initiatePasswordResult =  cognitoUserService.initiatePasswordReset(username,appClientId,appClientSecret);
-               response.withBody(initiatePasswordResult.toString());
-               response.withStatusCode(200);
-            }else if (action.equals("resetPassword")) {
-                String newPassword = forgotPasswordFlowDetails.get("newPassword").getAsString();
-                String confirmationCode = forgotPasswordFlowDetails.get("confirmationCode").getAsString();
-                JsonObject resetPasswordResult =
-                        cognitoUserService.confirmPasswordReset(username,newPassword,confirmationCode,appClientId,appClientSecret);
-                response.withBody(resetPasswordResult.toString());
-                response.withStatusCode(200);
-            }else{
-                response.withStatusCode(400);
-                response.withBody("Invalid action ");
+            switch (action) {
+                case "initiatePasswordReset":
+                    JsonObject initiatePasswordResult =  cognitoUserService.initiatePasswordReset(username,appClientId,appClientSecret);
+                    response.withBody(initiatePasswordResult.toString());
+                    response.withStatusCode(200);
+                    break;
+                case "resetPassword":
+                    String newPassword = forgotPasswordFlowDetails.get("newPassword").getAsString();
+                    String confirmationCode = forgotPasswordFlowDetails.get("confirmationCode").getAsString();
+                    JsonObject resetPasswordResult =
+                            cognitoUserService.confirmPasswordReset(username,newPassword,confirmationCode,appClientId,appClientSecret);
+                    response.withBody(resetPasswordResult.toString());
+                    response.withStatusCode(200);
+                    break;
+                default:
+                    response.withStatusCode(400);
+                    response.withBody("Invalid action ");
+                    break;
             }
 
         }catch (JsonSyntaxException e) {

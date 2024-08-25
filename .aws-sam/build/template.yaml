@@ -11,7 +11,7 @@ Globals:
     Runtime: java11
     Architectures:
     - x86_64
-    MemorySize: 512
+    MemorySize: 1024
     Environment:
       Variables:
         MY_COGNITO_POOL_APP_CLIENT_ID: AQICAHgFAAYb7H9c5LEEvvtO8HxwQtfYNHuk2d7a4BKX93QHiQFQmDPvBzKwq5jLeNgQ0C4xAAAAeTB3BgkqhkiG9w0BBwagajBoAgEAMGMGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMB4LcG/Q8i8c8OQK9AgEQgDYN2V0Zdh6PxPkdrC61lXWveazwwuiWp87Odmdj51T81hP6zLkGa+a6ueIMhQ+rYq5zP3W4OnM=
@@ -61,6 +61,14 @@ Resources:
     Properties:
       CodeUri: ResetPasswordHandlerFunction
       Handler: com.appsdeveloperblog.aws.lambda.ResetPasswordHandler::handleRequest
+      Policies:
+      - Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action:
+          - cognito-idp:ForgotPassword
+          - cognito-idp:ConfirmForgotPassword
+          Resource: arn:aws:cognito-idp:us-east-2:905418036196:userpool/us-east-2_4wr69uDOE
       Events:
         ResetPassword:
           Type: Api
